@@ -43,6 +43,7 @@ import org.elasticsearch.transport.TransportService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 abstract class TransportKillNodeAction<Request extends TransportRequest> extends AbstractComponent
     implements NodeAction<Request, KillResponse>, Callable<Request> {
@@ -56,7 +57,8 @@ abstract class TransportKillNodeAction<Request extends TransportRequest> extends
                             Settings settings,
                             JobContextService jobContextService,
                             ClusterService clusterService,
-                            TransportService transportService) {
+                            TransportService transportService,
+                            Supplier<Request> requestSupplier) {
         super(settings);
         this.jobContextService = jobContextService;
         this.clusterService = clusterService;
@@ -64,7 +66,7 @@ abstract class TransportKillNodeAction<Request extends TransportRequest> extends
         this.name = name;
         transportService.registerRequestHandler(
             name,
-            this,
+            requestSupplier,
             ThreadPool.Names.GENERIC,
             new NodeActionRequestHandler<Request, KillResponse>(this) {});
     }
@@ -82,7 +84,7 @@ abstract class TransportKillNodeAction<Request extends TransportRequest> extends
 
             @Override
             public void onFailure(@Nonnull Throwable t) {
-                listener.onFailure(t);
+                listener.onFailure((Exception) t);
             }
         });
     }

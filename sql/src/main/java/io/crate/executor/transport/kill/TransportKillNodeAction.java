@@ -31,9 +31,9 @@ import io.crate.executor.transport.NodeAction;
 import io.crate.executor.transport.NodeActionRequestHandler;
 import io.crate.jobs.JobContextService;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
+import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.ThreadPool;
@@ -62,7 +62,8 @@ abstract class TransportKillNodeAction<Request extends TransportRequest> extends
         this.clusterService = clusterService;
         this.transportService = transportService;
         this.name = name;
-        transportService.registerRequestHandler(name,
+        transportService.registerRequestHandler(
+            name,
             this,
             ThreadPool.Names.GENERIC,
             new NodeActionRequestHandler<Request, KillResponse>(this) {});
@@ -92,9 +93,10 @@ abstract class TransportKillNodeAction<Request extends TransportRequest> extends
     public void broadcast(Request request, ActionListener<KillResponse> listener) {
         DiscoveryNodes nodes = clusterService.state().nodes();
 
-        listener = new MultiActionListener<>(nodes.size(), KillResponse.MERGE_FUNCTION, listener);
+        listener = new MultiActionListener<>(nodes.getSize(), KillResponse.MERGE_FUNCTION, listener);
         DefaultTransportResponseHandler<KillResponse> responseHandler =
             new DefaultTransportResponseHandler<KillResponse>(listener) {
+
                 @Override
                 public KillResponse newInstance() {
                     return new KillResponse(0);

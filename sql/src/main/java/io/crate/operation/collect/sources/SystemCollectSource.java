@@ -50,7 +50,6 @@ import io.crate.operation.reference.sys.snapshot.SysSnapshots;
 import io.crate.planner.node.dql.CollectPhase;
 import io.crate.planner.node.dql.RoutedCollectPhase;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.discovery.DiscoveryService;
 
 import java.util.Collection;
 import java.util.List;
